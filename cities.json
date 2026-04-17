@@ -2,7 +2,7 @@
   "cities": [
     {
       "name": "Ahmedabad",
-      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/AUDA-COG.tif",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/AUDA-COG-ovr.tif",
       "center": [
         72.5714,
         23.0225
