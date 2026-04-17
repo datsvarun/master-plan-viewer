@@ -144,7 +144,7 @@
   // ── 5. Swipe Compare ────────────────────────────────
   //
   // Landscape: vertical bar dragged left/right (X axis)
-  // Portrait (height > width × 1.5): horizontal bar dragged up/down (Y axis)
+  // Portrait (height > width × 1.01): horizontal bar dragged up/down (Y axis)
   //
   // Implemented via WebGL scissor (within a render frame) +
   // CSS clip-path on the WebGL canvas (persists between frames,
@@ -158,7 +158,7 @@
 
     /** Returns true when the device is in portrait mode (height > width * 1.5). */
     function isPortrait() {
-      return mapEl.clientHeight > mapEl.clientWidth * 1.5;
+      return mapEl.clientHeight > mapEl.clientWidth * 1.01;
     }
 
     /** Apply the correct CSS clip to the cached WebGL canvas. */
@@ -183,13 +183,13 @@
       if (isPortrait()) {
         handle.classList.add('portrait');
         swipeY = mapEl.clientHeight / 2;
-        handle.style.top  = swipeY + 'px';
+        handle.style.top = swipeY + 'px';
         handle.style.left = '';
       } else {
         handle.classList.remove('portrait');
         swipeX = mapEl.clientWidth / 2;
         handle.style.left = swipeX + 'px';
-        handle.style.top  = '';
+        handle.style.top = '';
       }
       applyClip();
       map.render();
@@ -245,7 +245,7 @@
       if (isPortrait()) {
         // WebGL Y is bottom-up; scissor the TOP portion (0 → swipeY CSS px)
         var ratioH = canvas.height / mapEl.clientHeight;
-        var physH  = Math.round(swipeY * ratioH);
+        var physH = Math.round(swipeY * ratioH);
         gl.scissor(0, canvas.height - physH, canvas.width, physH);
       } else {
         var ratioW = canvas.width / mapEl.clientWidth;
@@ -273,7 +273,7 @@
   /** Update swipe position for the current axis and trigger a re-render. */
   function updateSwipe(clientX, clientY, mapEl) {
     var rect = mapEl.getBoundingClientRect();
-    if (mapEl.clientHeight > mapEl.clientWidth * 1.5) {
+    if (mapEl.clientHeight > mapEl.clientWidth * 1.01) {
       swipeY = Math.max(0, Math.min(clientY - rect.top, rect.height));
       document.getElementById('swipe-handle').style.top = swipeY + 'px';
     } else {
