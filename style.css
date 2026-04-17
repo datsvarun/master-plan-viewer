@@ -69,11 +69,12 @@ html, body {
   border-color: #005ba1;
 }
 
-/* ── Swipe Handle ────────────────────────────────────── */
+/* ── Swipe Handle — landscape (default) ─────────────── */
 #swipe-handle {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 0;          /* positioned by JS */
   width: 4px;
   margin-left: -2px;
   background: #222;
@@ -81,7 +82,6 @@ html, body {
   z-index: 15;
 }
 
-/* Circular grab indicator in the center */
 #swipe-handle::before {
   content: '⋮';
   position: absolute;
@@ -98,4 +98,29 @@ html, body {
   text-align: center;
   color: #555;
   pointer-events: none;
+}
+
+/* ── Swipe Handle — portrait mode ───────────────────── */
+#swipe-handle.portrait {
+  top: 0;           /* positioned by JS */
+  left: 0;
+  bottom: auto;
+  right: 0;
+  width: auto;
+  height: 4px;
+  margin-left: 0;
+  margin-top: -2px;
+  cursor: ns-resize;
+}
+
+#swipe-handle.portrait::before {
+  /* rotate the ⋮ so dots appear horizontal (⋯) */
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* ── Active state for swipe toggle button ────────────── */
+#swipe-toggle.active {
+  background: #0078d7;
+  color: #fff;
+  border-color: #005ba1;
 }
