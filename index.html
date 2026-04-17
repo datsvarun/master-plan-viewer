@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Plan Viewer</title>
+  <meta name="description"
+    content="View georeferenced raster master plans (Cloud Optimized GeoTIFFs) overlaid on a web basemap.">
+
+  <!-- OpenLayers CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.9.0/ol.css">
+  <!-- App CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Control panel (top-left) -->
+  <div id="controls">
+    <label for="city-select">City</label>
+    <select id="city-select">
+      <option value="">— Select a city —</option>
+    </select>
+
+    <button id="geolocate-btn" type="button">📍 My Location</button>
+
+    <label for="opacity-slider">Overlay Opacity</label>
+    <input id="opacity-slider" type="range" min="0" max="1" step="0.01" value="1">
+
+    <label>Basemap</label>
+    <div class="basemap-group">
+      <button id="basemap-osm" type="button" class="active">OSM</button>
+      <button id="basemap-sat" type="button">Satellite</button>
+    </div>
+  </div>
+
+  <!-- Vertical swipe divider -->
+  <div id="swipe-handle"></div>
+
+  <!-- geotiff.js — required by ol.source.GeoTIFF (not bundled in the OL CDN build) -->
+  <script src="https://cdn.jsdelivr.net/npm/geotiff@3.0.5/dist-browser/geotiff.js"></script>
+  <!-- OpenLayers JS (full build) -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@10.9.0/dist/ol.js"></script>
+  <!-- App JS -->
+  <script src="main.js"></script>
+
+</body>
+
+</html>
