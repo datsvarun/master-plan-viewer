@@ -1,11 +1,67 @@
 {
   "cities": [
     {
-      "name": "Ahmedabad",
+      "name": "Ahmedabad Urban Region Development Plan (AUDA)",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/AUDA-COG-ovr.tif",
-      "center": [72.5714, 23.0225],
+      "center": [
+        72.5714,
+        23.0225
+      ],
       "zoom": 12,
-      "extent": [8035107.605, 2603481.560, 8110646.341, 2675230.300]
+      "extent": [
+        8035107.605,
+        2603481.560,
+        8110646.341,
+        2675230.300
+      ]
+    },
+    {
+      "name": "Gurgaon (2031 Plan)",
+      "xyzUrl": "https://mapwarper.net/maps/tile/58486/{z}/{x}/{y}.png",
+      "center": [
+        77.0266,
+        28.4595
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Nashik Revised Draft Development Plan",
+      "xyzUrl": "https://mapwarper.net/maps/tile/101533/{z}/{x}/{y}.png",
+      "center": [
+        73.80927035,
+        19.99149755
+      ],
+      "zoom": 12,
+      "extent": [
+        8201063.757,
+        2259648.703,
+        8231757.023,
+        2284406.955
+      ]
+    },
+    {
+      "name": "Bengaluru RMP 2015 PLU",
+      "xyzUrl": "https://mapwarper.net/layers/tile/2147/{z}/{x}/{y}.png",
+      "center": [
+        77.5806305,
+        12.97986305
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Regional Development Plan for Goa 2021",
+      "xyzUrl": "https://mapwarper.net/layers/tile/2054/{z}/{x}/{y}.png",
+      "center": [
+        73.989728,
+        15.357619
+      ],
+      "zoom": 10,
+      "extent": [
+        8194127.355,
+        1675887.598,
+        8278870.371,
+        1785134.620
+      ]
     }
   ]
 }

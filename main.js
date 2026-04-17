@@ -23,14 +23,29 @@
   // ── Initialisation ───────────────────────────────────
   function init(cities) {
     // Basemap sources
-    osmSource = new ol.source.OSM();
-    satSource = new ol.source.XYZ({
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      maxZoom: 19,
-      attributions: 'Tiles &copy; Esri'
+    var IndiaBoundaryCorrectedTileLayer = IndiaBoundaryCorrector.IndiaBoundaryCorrectedTileLayer;
+    
+    // Corrected OSM Source Layer
+    basemapLayer = new IndiaBoundaryCorrectedTileLayer({
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      sourceOptions: {
+        attributions: '© OpenStreetMap contributors',
+        crossOrigin: 'anonymous'
+      }
     });
 
-    basemapLayer = new ol.layer.Tile({ source: osmSource });
+    var satLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        maxZoom: 19,
+        attributions: 'Tiles &copy; Esri',
+        crossOrigin: 'anonymous'
+      }),
+      visible: false // Start hidden since default is OSM
+    });
+
+    // Make sure satLayer is exposed to the outer scope to be toggled
+    window.satLayer = satLayer;
 
     // COG overlay layer — source is set when a city is selected.
     // WebGLTile is required for ol.source.GeoTIFF rendering.
@@ -38,7 +53,7 @@
 
     map = new ol.Map({
       target: 'map',
-      layers: [basemapLayer, cogLayer],
+      layers: [basemapLayer, satLayer, cogLayer],
       controls: ol.control.defaults.defaults({ zoom: false }),
       view: new ol.View({
         center: ol.proj.fromLonLat([78.9629, 20.5937]), // Centre of India
@@ -70,22 +85,33 @@
       if (select.value === '') return;
       var city = cities[parseInt(select.value, 10)];
 
-      // Build the GeoTIFF source.
-      // interpolate + normalize are required for correct WebGLTile rendering.
-      // wrapX:false prevents phantom tile fetches at the antimeridian.
-      var source = new ol.source.GeoTIFF({
-        sources: [{ url: city.cogUrl }],
-        interpolate: true,
-        normalize: true,
-        wrapX: false
-      });
+      // Build the source.
+      // WebGLTile works with both GeoTIFF and XYZ sources.
+      var source;
+      if (city.xyzUrl) {
+        source = new ol.source.XYZ({
+          url: city.xyzUrl,
+          crossOrigin: 'anonymous'
+        });
+      } else {
+        // Default to GeoTIFF
+        // interpolate + normalize are required for correct WebGLTile rendering.
+        // wrapX:false prevents phantom tile fetches at the antimeridian.
+        source = new ol.source.GeoTIFF({
+          sources: [{ url: city.cogUrl }],
+          interpolate: true,
+          normalize: true,
+          wrapX: false
+        });
+      }
 
-      // Set the layer extent from gdalinfo EPSG:3857 bounds stored in cities.json.
-      // This tells OL exactly where to draw tiles and avoids stale renders
-      // outside the COG footprint. Only set if the city provides an extent.
+      // Set the layer extent if provided in cities.json.
+      // This tells OL exactly where to draw tiles.
       cogLayer.setSource(source);
       if (city.extent) {
         cogLayer.setExtent(city.extent);
+      } else {
+        cogLayer.setExtent(undefined); // Clear previous extent
       }
 
       // Apply current opacity slider value
@@ -146,11 +172,13 @@
     toggleBtn.addEventListener('click', function () {
       isOsm = !isOsm;
       if (isOsm) {
-        basemapLayer.setSource(osmSource);
+        basemapLayer.setVisible(true);
+        satLayer.setVisible(false);
         toggleBtn.textContent = '🛰️';
         toggleBtn.title = 'Switch to Satellite';
       } else {
-        basemapLayer.setSource(satSource);
+        basemapLayer.setVisible(false);
+        satLayer.setVisible(true);
         toggleBtn.textContent = '🗺️';
         toggleBtn.title = 'Switch to Street Map';
       }
