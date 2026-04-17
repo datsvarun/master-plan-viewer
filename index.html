@@ -21,25 +21,32 @@
 
   <!-- Control panel (top-left) -->
   <div id="controls">
-    <h2>Varun's Indian Master Plan Viewer</h2>
-    <label for="city-select">City</label>
-    <select id="city-select">
-      <option value="">— Select a city —</option>
-    </select>
-
-    <button id="geolocate-btn" type="button">📍 My Location</button>
-
-    <label for="opacity-slider">Overlay Opacity</label>
-    <input id="opacity-slider" type="range" min="0" max="1" step="0.01" value="1">
-
-    <label>Basemap</label>
-    <div class="basemap-group">
-      <button id="basemap-osm" type="button" class="active">OSM</button>
-      <button id="basemap-sat" type="button">Satellite</button>
+    <div id="controls-header">
+      <button id="menu-toggle" type="button" class="icon-btn" aria-label="Toggle Menu">☰</button>
+      <div class="slider-wrapper">
+        Opacity&nbsp;
+        <label for="opacity-slider" style="display: none;">Overlay Opacity</label>
+        <input id="opacity-slider" type="range" min="0" max="1" step="0.01" value="1" title="Overlay Opacity">
+      </div>
     </div>
 
-    <label>Compare</label>
-    <button id="swipe-toggle" type="button" class="active">⇔ Swipe On</button>
+    <div id="menu-content">
+      <h2>Varun's Indian Master Plan Viewer</h2>
+      <label for="city-select">City</label>
+      <select id="city-select">
+        <option value="">— Select a city —</option>
+      </select>
+      <label>Compare</label>
+      <button id="swipe-toggle" type="button" class="active">⇔ Swipe On</button>
+    </div>
+  </div>
+
+  <!-- Bottom Left Controls -->
+  <div id="bottom-left-controls">
+    <!-- Floating action button for basemap toggle -->
+    <button id="basemap-toggle-btn" type="button" class="fab" title="Toggle Basemap">🗺️</button>
+    <!-- Floating action button for geolocation -->
+    <button id="geolocate-btn" type="button" class="fab" title="My Location">📍</button>
   </div>
 
   <!-- Vertical swipe divider -->

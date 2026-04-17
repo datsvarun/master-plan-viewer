@@ -39,6 +39,7 @@
     map = new ol.Map({
       target: 'map',
       layers: [basemapLayer, cogLayer],
+      controls: ol.control.defaults.defaults({ zoom: false }),
       view: new ol.View({
         center: ol.proj.fromLonLat([78.9629, 20.5937]), // Centre of India
         zoom: 5
@@ -50,6 +51,7 @@
     setupOpacitySlider();
     setupBasemapToggle();
     setupSwipe();
+    setupMenuToggle();
   }
 
   // ── 1. City Selector ─────────────────────────────────
@@ -134,23 +136,38 @@
 
   // ── 4. Basemap Toggle ────────────────────────────────
   function setupBasemapToggle() {
-    var osmBtn = document.getElementById('basemap-osm');
-    var satBtn = document.getElementById('basemap-sat');
+    var toggleBtn = document.getElementById('basemap-toggle-btn');
+    var isOsm = true;
 
-    osmBtn.addEventListener('click', function () {
-      basemapLayer.setSource(osmSource);
-      osmBtn.classList.add('active');
-      satBtn.classList.remove('active');
-    });
+    // Start with Satellite icon since starting map is OSM
+    toggleBtn.textContent = '🛰️';
+    toggleBtn.title = 'Switch to Satellite';
 
-    satBtn.addEventListener('click', function () {
-      basemapLayer.setSource(satSource);
-      satBtn.classList.add('active');
-      osmBtn.classList.remove('active');
+    toggleBtn.addEventListener('click', function () {
+      isOsm = !isOsm;
+      if (isOsm) {
+        basemapLayer.setSource(osmSource);
+        toggleBtn.textContent = '🛰️';
+        toggleBtn.title = 'Switch to Satellite';
+      } else {
+        basemapLayer.setSource(satSource);
+        toggleBtn.textContent = '🗺️';
+        toggleBtn.title = 'Switch to Street Map';
+      }
     });
   }
 
-  // ── 5. Swipe Compare ────────────────────────────────
+  // ── 5. Menu Toggle ───────────────────────────────────
+  function setupMenuToggle() {
+    var toggleBtn = document.getElementById('menu-toggle');
+    var menuContent = document.getElementById('menu-content');
+
+    toggleBtn.addEventListener('click', function () {
+      menuContent.classList.toggle('hidden');
+    });
+  }
+
+  // ── 6. Swipe Compare ────────────────────────────────
   //
   // Landscape: vertical bar dragged left/right (X axis)
   // Portrait (height > width × 1.01): horizontal bar dragged up/down (Y axis)
