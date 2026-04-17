@@ -1,9 +1,15 @@
 /* ── Reset & Layout ──────────────────────────────────── */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 #map {
@@ -74,49 +80,86 @@ html, body {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;          /* positioned by JS */
-  width: 4px;
-  margin-left: -2px;
-  background: #222;
+  left: 0;
+  /* positioned by JS */
+  width: 44px;
+  /* wide hit area; visual bar is in ::after */
+  margin-left: -22px;
+  background: transparent;
   cursor: ew-resize;
   z-index: 15;
 }
 
+/* Thin visual bar (paints behind the circle via z-index) */
+#swipe-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Drag pill — left/right arrows, elevated above the bar */
 #swipe-handle::before {
-  content: '⋮';
+  content: '◀ ▶';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 26px;
-  height: 26px;
+  width: 48px;
+  height: 28px;
   background: #fff;
-  border: 2px solid #222;
-  border-radius: 50%;
-  font-size: 16px;
-  line-height: 26px;
+  border: 1.5px solid rgba(0, 0, 0, 0.4);
+  border-radius: 14px;
+  font-size: 11px;
+  line-height: 28px;
   text-align: center;
-  color: #555;
+  color: #333;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
   pointer-events: none;
+  z-index: 1;
+  /* above the ::after bar */
 }
 
 /* ── Swipe Handle — portrait mode ───────────────────── */
 #swipe-handle.portrait {
-  top: 0;           /* positioned by JS */
+  top: 0;
+  /* positioned by JS */
   left: 0;
   bottom: auto;
   right: 0;
   width: auto;
-  height: 4px;
+  height: 44px;
+  /* tall hit area for portrait */
   margin-left: 0;
-  margin-top: -2px;
+  margin-top: -22px;
   cursor: ns-resize;
 }
 
+/* Portrait: thin horizontal visual bar */
+#swipe-handle.portrait::after {
+  top: 50%;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 3px;
+  margin-left: 0;
+  margin-top: -1.5px;
+}
+
+/* Portrait: rotate pill so arrows point up/down */
 #swipe-handle.portrait::before {
-  /* rotate the ⋮ so dots appear horizontal (⋯) */
   transform: translate(-50%, -50%) rotate(90deg);
 }
+
 
 /* ── Active state for swipe toggle button ────────────── */
 #swipe-toggle.active {

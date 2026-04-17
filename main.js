@@ -68,31 +68,40 @@
       if (select.value === '') return;
       var city = cities[parseInt(select.value, 10)];
 
-      // Load the COG. OpenLayers reads the GeoTIFF metadata to derive
-      // the correct projection, extent, and resolutions via source.getView().
+      // Build the GeoTIFF source.
+      // interpolate + normalize are required for correct WebGLTile rendering.
+      // wrapX:false prevents phantom tile fetches at the antimeridian.
       var source = new ol.source.GeoTIFF({
-        sources: [{ url: city.cogUrl }]
+        sources: [{ url: city.cogUrl }],
+        interpolate: true,
+        normalize: true,
+        wrapX: false
       });
-      cogLayer.setSource(source);
 
-      // Apply current opacity slider value to the new source
+      // Set the layer extent from gdalinfo EPSG:3857 bounds stored in cities.json.
+      // This tells OL exactly where to draw tiles and avoids stale renders
+      // outside the COG footprint. Only set if the city provides an extent.
+      cogLayer.setSource(source);
+      if (city.extent) {
+        cogLayer.setExtent(city.extent);
+      }
+
+      // Apply current opacity slider value
       cogLayer.setOpacity(parseFloat(document.getElementById('opacity-slider').value));
 
-      // Let the COG's own metadata drive the view (projection + extent),
-      // matching the pattern from the official OpenLayers COG example.
-      source.getView().then(function (viewConfig) {
-        map.setView(new ol.View(viewConfig));
-      }).catch(function (err) {
-        console.error('Failed to read COG view metadata:', err);
-        // Fallback: fly to the city center from cities.json
-        map.getView().animate({
-          center: ol.proj.fromLonLat(city.center),
-          zoom: city.zoom,
-          duration: 1500
-        });
-      });
+      // Do NOT use source.getView() — it derives minZoom/maxZoom from the COG
+      // metadata and often clamps the zoom range too tightly, causing the layer
+      // to vanish when zoomed out. Set the view manually instead.
+      map.setView(new ol.View({
+        center: ol.proj.fromLonLat(city.center),
+        zoom: city.zoom,
+        minZoom: 4,
+        maxZoom: 20,
+        projection: 'EPSG:3857'
+      }));
     });
   }
+
 
   // ── 2. User Geolocation ──────────────────────────────
   function setupGeolocation() {
