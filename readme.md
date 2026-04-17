@@ -1,6 +1,8 @@
 # Master Plan Viewer
 
-A lightweight, no-build web application that displays georeferenced raster master plans (Cloud Optimized GeoTIFFs) on an interactive web map using **OpenLayers** loaded from a CDN.
+A lightweight, no-build web application that displays georeferenced raster master plans of Indian Cities (Cloud Optimized GeoTIFFs) on an interactive web map using **OpenLayers** loaded from a CDN.
+
+<img width="1920" height="908" alt="master-plan-viewer" src="https://github.com/user-attachments/assets/6ed666ef-4fae-45ed-911f-08434dd02923" />
 
 ## Quick Start
 
