@@ -1,4 +1,4 @@
-# Master Plan Viewer
+# Indian Cities Master/Development Plan Viewer
 
 A lightweight, no-build web application that displays georeferenced raster master plans of Indian Cities (Cloud Optimized GeoTIFFs) on an interactive web map using **OpenLayers** loaded from a CDN.
 
