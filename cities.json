@@ -62,6 +62,42 @@
         8278870.371,
         1785134.620
       ]
+    },
+    {
+      "name": "Chennai City Final",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Chennai-City-Final.tif",
+      "center": [
+        80.2707,
+        13.0827
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Chennai Region",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Chennai_Region_COG.webp.tif",
+      "center": [
+        80.2707,
+        13.0827
+      ],
+      "zoom": 11
+    },
+    {
+      "name": "Delhi Master Plan 2041",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Delhi_2041_COG.tif",
+      "center": [
+        77.1025,
+        28.7041
+      ],
+      "zoom": 11
+    },
+    {
+      "name": "Pune Metropolitan Region (PMRDA)",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/PMRDA_COG.tif",
+      "center": [
+        73.8567,
+        18.5204
+      ],
+      "zoom": 11
     }
   ]
 }
