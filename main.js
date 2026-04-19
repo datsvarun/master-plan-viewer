@@ -62,6 +62,7 @@
     });
 
     setupCitySelector(cities);
+    setupAddressSearch();
     setupGeolocation();
     setupOpacitySlider();
     setupBasemapToggle();
@@ -131,7 +132,103 @@
   }
 
 
-  // ── 2. User Geolocation ──────────────────────────────
+  // ── 2. Address Search (Nominatim) ───────────────────
+  function setupAddressSearch() {
+    var input = document.getElementById('address-search');
+    var resultsList = document.getElementById('search-results');
+    var debounceTimer = null;
+    var activeIndex = -1;
+
+    function closeResults() {
+      resultsList.classList.remove('open');
+      resultsList.innerHTML = '';
+      activeIndex = -1;
+    }
+
+    function renderResults(items) {
+      resultsList.innerHTML = '';
+      activeIndex = -1;
+      if (!items.length) {
+        var li = document.createElement('li');
+        li.className = 'no-results';
+        li.textContent = 'No results found';
+        resultsList.appendChild(li);
+      } else {
+        items.forEach(function (item) {
+          var li = document.createElement('li');
+          li.textContent = item.display_name;
+          li.setAttribute('role', 'option');
+          li.addEventListener('mousedown', function (e) {
+            e.preventDefault(); // keep input focused
+            selectResult(item);
+          });
+          resultsList.appendChild(li);
+        });
+      }
+      resultsList.classList.add('open');
+    }
+
+    function selectResult(item) {
+      input.value = item.display_name;
+      closeResults();
+      var bbox = item.boundingbox; // [minLat, maxLat, minLon, maxLon]
+      var extent = ol.proj.transformExtent(
+        [parseFloat(bbox[2]), parseFloat(bbox[0]), parseFloat(bbox[3]), parseFloat(bbox[1])],
+        'EPSG:4326',
+        'EPSG:3857'
+      );
+      map.getView().fit(extent, { duration: 600, maxZoom: 17 });
+    }
+
+    function search(query) {
+      if (!query.trim()) { closeResults(); return; }
+      fetch(
+        'https://nominatim.openstreetmap.org/search?q=' +
+        encodeURIComponent(query) +
+        '&format=json&limit=5&addressdetails=0',
+        { headers: { 'Accept-Language': 'en' } }
+      )
+        .then(function (res) { return res.json(); })
+        .then(function (data) { renderResults(data); })
+        .catch(function () { closeResults(); });
+    }
+
+    input.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () { search(input.value); }, 350);
+    });
+
+    // Keyboard navigation
+    input.addEventListener('keydown', function (e) {
+      var items = resultsList.querySelectorAll('li:not(.no-results)');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && items[activeIndex]) {
+          items[activeIndex].dispatchEvent(new MouseEvent('mousedown'));
+        }
+        return;
+      } else if (e.key === 'Escape') {
+        closeResults();
+        return;
+      }
+      items.forEach(function (li, i) {
+        li.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!document.getElementById('search-wrapper').contains(e.target)) {
+        closeResults();
+      }
+    });
+  }
+
+  // ── 3. User Geolocation (was ── 2.) ─────────────────
   function setupGeolocation() {
     document.getElementById('geolocate-btn').addEventListener('click', function () {
       if (!navigator.geolocation) {
