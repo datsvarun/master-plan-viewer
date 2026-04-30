@@ -1,6 +1,15 @@
 {
   "cities": [
     {
+      "name": "Navi Mumbai (CIDCO Plan)",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Navi_Mumbai_CIDCO.tif",
+      "center": [
+        73.0169,
+        19.0330
+      ],
+      "zoom": 12
+    },
+    {
       "name": "Ahmedabad Urban Region Development Plan (AUDA)",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/AUDA-COG-ovr.tif",
       "center": [
