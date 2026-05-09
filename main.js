@@ -448,7 +448,7 @@
       savedTheme = null;
     }
 
-    currentTheme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    currentTheme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
 
     function applyBasemapFilter(theme) {
       if (!map) return;
