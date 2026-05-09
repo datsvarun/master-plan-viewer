@@ -1,7 +1,7 @@
 {
   "cities": [
     {
-      "name": "Navi Mumbai (CIDCO Plan)",
+      "name": "Navi Mumbai (CIDCO Nodal Plan)",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Navi_Mumbai_CIDCO.tif",
       "center": [
         73.0169,
@@ -10,22 +10,16 @@
       "zoom": 12
     },
     {
-      "name": "Ahmedabad Urban Region Development Plan (AUDA)",
+      "name": "Ahmedabad Region",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/AUDA-COG-ovr.tif",
       "center": [
         72.5714,
         23.0225
       ],
-      "zoom": 12,
-      "extent": [
-        8035107.605,
-        2603481.560,
-        8110646.341,
-        2675230.300
-      ]
+      "zoom": 12
     },
     {
-      "name": "Gurgaon (2031 Plan)",
+      "name": "Gurgaon",
       "xyzUrl": "https://mapwarper.net/maps/tile/58486/{z}/{x}/{y}.png",
       "center": [
         77.0266,
@@ -34,22 +28,16 @@
       "zoom": 12
     },
     {
-      "name": "Nashik Revised Draft Development Plan",
+      "name": "Nashik Old",
       "xyzUrl": "https://mapwarper.net/maps/tile/101533/{z}/{x}/{y}.png",
       "center": [
         73.80927035,
         19.99149755
       ],
-      "zoom": 12,
-      "extent": [
-        8201063.757,
-        2259648.703,
-        8231757.023,
-        2284406.955
-      ]
+      "zoom": 12
     },
     {
-      "name": "Bengaluru RMP 2015 PLU",
+      "name": "Bengaluru 2015",
       "xyzUrl": "https://mapwarper.net/layers/tile/2147/{z}/{x}/{y}.png",
       "center": [
         77.5806305,
@@ -58,19 +46,13 @@
       "zoom": 12
     },
     {
-      "name": "Regional Development Plan for Goa 2021",
+      "name": "Goa Region",
       "xyzUrl": "https://mapwarper.net/layers/tile/2054/{z}/{x}/{y}.png",
       "center": [
         73.989728,
         15.357619
       ],
-      "zoom": 10,
-      "extent": [
-        8194127.355,
-        1675887.598,
-        8278870.371,
-        1785134.620
-      ]
+      "zoom": 10
     },
     {
       "name": "Chennai City",
@@ -91,7 +73,7 @@
       "zoom": 11
     },
     {
-      "name": "Delhi Master Plan 2041",
+      "name": "Delhi",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Delhi_2041_COG.tif",
       "center": [
         77.1025,
@@ -100,13 +82,203 @@
       "zoom": 11
     },
     {
-      "name": "Pune Metropolitan Region (PMRDA)",
+      "name": "Pune Region",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/PMRDA_COG.tif",
       "center": [
         73.8567,
         18.5204
       ],
       "zoom": 11
+    },
+    {
+      "name": "Sangli-Miraj-Kupwad City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Sangli-Miraj-Kupwad.tif",
+      "center": [
+        74.604,
+        16.854
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Mumbai Region Airport Funnel",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/Tiles/Airport_Funnel_MUMBAI_NAVI_MUMBAI_COG_Final.tif",
+      "center": [
+        73.0169,
+        19.033
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Akola City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Akola_DP.tif",
+      "center": [
+        77.0082,
+        20.7002
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Chhatrapati Sambhajinagar (Aurangabad) ",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Aurangabad_DP.tif",
+      "center": [
+        75.3433,
+        19.8762
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Bengaluru 2031",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Bengaluru_2031.tif",
+      "center": [
+        77.5946,
+        12.9716
+      ],
+      "zoom": 11
+    },
+    {
+      "name": "Dahanu Town",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/DAHANU-DP.tif",
+      "center": [
+        72.7126,
+        19.974
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Hyderabad Core",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/GHMC_COG.tif",
+      "center": [
+        78.4867,
+        17.385
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Hyderabad Region",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Hyderabad_2.tif",
+      "center": [
+        78.4867,
+        17.385
+      ],
+      "zoom": 11
+    },
+    {
+      "name": "Mumbai City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Mumbai_Final_COG.tif",
+      "center": [
+        72.8777,
+        19.076
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Nagpur City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Nagpur_City.tif",
+      "center": [
+        79.0882,
+        21.1458
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Nagpur Region",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Nagpur_Region_2.tif",
+      "center": [
+        79.0882,
+        21.1458
+      ],
+      "zoom": 11
+    },
+    {
+      "name": "Nashik City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Nashik_DP.tif",
+      "center": [
+        73.7898,
+        19.9975
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Navi Mumbai (NMMC DP)",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Navi_Mumbai_DP38_COG.tif",
+      "center": [
+        73.0169,
+        19.033
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Panvel City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Panvel_DP.tif",
+      "center": [
+        73.1175,
+        18.9888
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Pimpri-Chinchwad City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/PCMC_Final_COG.tif",
+      "center": [
+        73.7985,
+        18.6298
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Pune City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Pune_City.tif",
+      "center": [
+        73.8567,
+        18.5204
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Solapur",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Solapur_DP_41.tif",
+      "center": [
+        75.9064,
+        17.6599
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Thane City",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Thane-26-COG-Final_2.tif",
+      "center": [
+        72.9781,
+        19.2183
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Ulhasnagar",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Ulhasnagar_Final_COG.tif",
+      "center": [
+        73.1645,
+        19.2215
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Vasai-Virar",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Vasai_Virar_COG_Final.tif",
+      "center": [
+        72.8397,
+        19.3919
+      ],
+      "zoom": 13
+    }
+    ,
+    {
+      "name": "Srinagar",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Srinagar.tif",
+      "center": [
+        74.7973,
+        34.0837
+      ],
+      "zoom": 13
     }
   ]
 }

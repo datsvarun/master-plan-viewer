@@ -9,10 +9,11 @@
   'use strict';
 
   // ── Shared state ─────────────────────────────────────
-  var map, cogLayer, basemapLayer;
+  var map, cogLayer, basemapLayer, locationLayer, locationFeature;
   var osmSource, satSource;
   var swipeX; // swipe position in CSS pixels from left edge (landscape)
   var swipeY; // swipe position in CSS pixels from top edge (portrait)
+  var currentTheme = 'light';
 
   // ── Bootstrap ────────────────────────────────────────
   fetch('cities.json')
@@ -22,6 +23,8 @@
 
   // ── Initialisation ───────────────────────────────────
   function init(cities) {
+    setupThemeToggle();
+
     // Basemap sources
     var IndiaBoundaryCorrectedTileLayer = IndiaBoundaryCorrector.IndiaBoundaryCorrectedTileLayer;
     
@@ -51,9 +54,22 @@
     // WebGLTile is required for ol.source.GeoTIFF rendering.
     cogLayer = new ol.layer.WebGLTile();
 
+    locationFeature = new ol.Feature({
+      geometry: new ol.geom.Point(ol.proj.fromLonLat([78.9629, 20.5937]))
+    });
+    locationFeature.setStyle(createLocationStyle());
+
+    locationLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [locationFeature]
+      }),
+      zIndex: 1000
+    });
+    locationFeature.setGeometry(null);
+
     map = new ol.Map({
       target: 'map',
-      layers: [basemapLayer, satLayer, cogLayer],
+      layers: [basemapLayer, satLayer, cogLayer, locationLayer],
       controls: ol.control.defaults.defaults({ zoom: false }),
       view: new ol.View({
         center: ol.proj.fromLonLat([78.9629, 20.5937]), // Centre of India
@@ -64,6 +80,7 @@
     setupCitySelector(cities);
     setupAddressSearch();
     setupGeolocation();
+    setupInfoModal();
     setupOpacitySlider();
     setupBasemapToggle();
     setupSwipe();
@@ -72,20 +89,112 @@
 
   // ── 1. City Selector ─────────────────────────────────
   function setupCitySelector(cities) {
-    var select = document.getElementById('city-select');
+    var input = document.getElementById('city-search');
+    var resultsList = document.getElementById('city-results');
+    var debounceTimer = null;
+    var activeIndex = -1;
+    var filteredCities = [];
 
-    // Populate dropdown
-    cities.forEach(function (city, i) {
-      var opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = city.name;
-      select.appendChild(opt);
+    function closeResults() {
+      resultsList.classList.remove('open');
+      resultsList.innerHTML = '';
+      activeIndex = -1;
+    }
+
+    function renderResults(items) {
+      resultsList.innerHTML = '';
+      activeIndex = -1;
+      filteredCities = items;
+
+      if (!items.length) {
+        var empty = document.createElement('li');
+        empty.className = 'no-results';
+        empty.textContent = 'No cities found';
+        resultsList.appendChild(empty);
+      } else {
+        items.forEach(function (city, index) {
+          var li = document.createElement('li');
+          li.textContent = city.name;
+          li.setAttribute('role', 'option');
+          li.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            selectCity(city);
+          });
+          resultsList.appendChild(li);
+        });
+      }
+
+      resultsList.classList.add('open');
+    }
+
+    function filterCities(query) {
+      var normalized = query.trim().toLowerCase();
+      var sorted = cities.slice().sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+      });
+
+      if (!normalized) {
+        return sorted;
+      }
+
+      return sorted.filter(function (city) {
+        return city.name.toLowerCase().indexOf(normalized) !== -1;
+      });
+    }
+
+    function search(query) {
+      renderResults(filterCities(query));
+    }
+
+    function selectCity(city) {
+      input.value = city.name;
+      closeResults();
+      loadCity(city);
+    }
+
+    closeResults();
+
+    input.addEventListener('focus', function () {
+      search(input.value);
     });
 
-    select.addEventListener('change', function () {
-      if (select.value === '') return;
-      var city = cities[parseInt(select.value, 10)];
+    input.addEventListener('input', function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () { search(input.value); }, 150);
+    });
 
+    input.addEventListener('keydown', function (e) {
+      var items = resultsList.querySelectorAll('li:not(.no-results)');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && filteredCities[activeIndex]) {
+          selectCity(filteredCities[activeIndex]);
+        } else if (filteredCities.length === 1) {
+          selectCity(filteredCities[0]);
+        }
+        return;
+      } else if (e.key === 'Escape') {
+        closeResults();
+        return;
+      }
+
+      items.forEach(function (li, i) {
+        li.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!document.getElementById('city-search-wrapper').contains(e.target)) {
+        closeResults();
+      }
+    });
+
+    function loadCity(city) {
       // Build the source.
       // WebGLTile works with both GeoTIFF and XYZ sources.
       var source;
@@ -95,9 +204,6 @@
           crossOrigin: 'anonymous'
         });
       } else {
-        // Default to GeoTIFF
-        // interpolate + normalize are required for correct WebGLTile rendering.
-        // wrapX:false prevents phantom tile fetches at the antimeridian.
         source = new ol.source.GeoTIFF({
           sources: [{ url: city.cogUrl }],
           interpolate: true,
@@ -106,21 +212,15 @@
         });
       }
 
-      // Set the layer extent if provided in cities.json.
-      // This tells OL exactly where to draw tiles.
       cogLayer.setSource(source);
       if (city.extent) {
         cogLayer.setExtent(city.extent);
       } else {
-        cogLayer.setExtent(undefined); // Clear previous extent
+        cogLayer.setExtent(undefined);
       }
 
-      // Apply current opacity slider value
       cogLayer.setOpacity(parseFloat(document.getElementById('opacity-slider').value));
 
-      // Do NOT use source.getView() — it derives minZoom/maxZoom from the COG
-      // metadata and often clamps the zoom range too tightly, causing the layer
-      // to vanish when zoomed out. Set the view manually instead.
       map.setView(new ol.View({
         center: ol.proj.fromLonLat(city.center),
         zoom: city.zoom,
@@ -128,7 +228,10 @@
         maxZoom: 20,
         projection: 'EPSG:3857'
       }));
-    });
+    }
+
+    // Keep the first city ready without auto-loading it.
+    // The user can search and choose from the dropdown.
   }
 
 
@@ -237,8 +340,13 @@
       }
       navigator.geolocation.getCurrentPosition(
         function (pos) {
+          var locationCoords = ol.proj.fromLonLat([pos.coords.longitude, pos.coords.latitude]);
+
+          locationFeature.setGeometry(new ol.geom.Point(locationCoords));
+          locationLayer.setVisible(true);
+
           map.getView().animate({
-            center: ol.proj.fromLonLat([pos.coords.longitude, pos.coords.latitude]),
+            center: locationCoords,
             zoom: 14,
             duration: 1500
           });
@@ -250,14 +358,61 @@
     });
   }
 
-  // ── 3. Opacity Slider ────────────────────────────────
+  function createLocationStyle() {
+    var circleSvg = [
+      '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">',
+      '<circle cx="20" cy="20" r="10" fill="#1a73e8" stroke="#ffffff" stroke-width="4"/>',
+      '</svg>'
+    ].join('');
+
+    return new ol.style.Style({
+      image: new ol.style.Icon({
+        src: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(circleSvg),
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        scale: 1
+      })
+    });
+  }
+
+  // ── 3.5. Info Modal ─────────────────────────────────
+  function setupInfoModal() {
+    var infoBtn = document.getElementById('info-btn');
+    var modal = document.getElementById('info-modal');
+    var closeBtn = document.getElementById('modal-close');
+
+    infoBtn.addEventListener('click', function () {
+      modal.classList.add('open');
+    });
+
+    closeBtn.addEventListener('click', function () {
+      modal.classList.remove('open');
+    });
+
+    modal.addEventListener('click', function (e) {
+      // Close modal if clicking outside the content
+      if (e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        modal.classList.remove('open');
+      }
+    });
+  }
+
+  // ── 4. Opacity Slider ────────────────────────────────
   function setupOpacitySlider() {
     document.getElementById('opacity-slider').addEventListener('input', function (e) {
       cogLayer.setOpacity(parseFloat(e.target.value));
     });
   }
 
-  // ── 4. Basemap Toggle ────────────────────────────────
+  // ── 5. Basemap Toggle ────────────────────────────────
   function setupBasemapToggle() {
     var toggleBtn = document.getElementById('basemap-toggle-btn');
     var isOsm = true;
@@ -282,7 +437,58 @@
     });
   }
 
-  // ── 5. Menu Toggle ───────────────────────────────────
+  // ── 5. Theme Toggle ─────────────────────────────────
+  function setupThemeToggle() {
+    var toggleBtn = document.getElementById('theme-toggle');
+    var savedTheme = null;
+
+    try {
+      savedTheme = localStorage.getItem('theme');
+    } catch (err) {
+      savedTheme = null;
+    }
+
+    currentTheme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    function applyBasemapFilter(theme) {
+      if (!map) return;
+      
+      // Target the map's viewport which contains all rendered layers
+      var viewport = map.getViewport();
+      if (viewport) {
+        if (theme === 'dark') {
+          // Apply color inversion matrix: inverts light tiles to dark
+          viewport.style.filter = 'invert(0.9) brightness(1.05) contrast(1.05) hue-rotate(180deg)';
+        } else {
+          viewport.style.filter = 'none';
+        }
+      }
+    }
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      document.body.setAttribute('data-theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      toggleBtn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+      applyBasemapFilter(theme);
+      try {
+        localStorage.setItem('theme', theme);
+      } catch (err) {
+        // Ignore storage failures.
+      }
+    }
+
+    // Defer theme application until after map is initialized
+    setTimeout(function() {
+      applyTheme(currentTheme);
+    }, 100);
+
+    toggleBtn.addEventListener('click', function () {
+      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  // ── 6. Menu Toggle ───────────────────────────────────
   function setupMenuToggle() {
     var toggleBtn = document.getElementById('menu-toggle');
     var menuContent = document.getElementById('menu-content');
@@ -292,7 +498,7 @@
     });
   }
 
-  // ── 6. Swipe Compare ────────────────────────────────
+  // ── 7. Swipe Compare ────────────────────────────────
   //
   // Landscape: vertical bar dragged left/right (X axis)
   // Portrait (height > width × 1.01): horizontal bar dragged up/down (Y axis)

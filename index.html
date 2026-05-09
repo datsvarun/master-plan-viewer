@@ -23,6 +23,7 @@
   <div id="controls">
     <div id="controls-header">
       <button id="menu-toggle" type="button" class="icon-btn" aria-label="Toggle Menu">☰</button>
+      <button id="theme-toggle" type="button" class="icon-btn" aria-label="Toggle Dark Mode">🌙</button>
       <div class="slider-wrapper">
         Opacity&nbsp;
         <label for="opacity-slider" style="display: none;">Overlay Opacity</label>
@@ -37,10 +38,11 @@
         <input id="address-search" type="search" placeholder="Search for a place…" autocomplete="off" aria-label="Search address">
         <ul id="search-results" role="listbox" aria-label="Search results"></ul>
       </div>
-      <label for="city-select">City</label>
-      <select id="city-select">
-        <option value="">— Select a city —</option>
-      </select>
+      <label for="city-search">City</label>
+      <div id="city-search-wrapper">
+        <input id="city-search" type="search" placeholder="Search cities…" autocomplete="off" aria-label="Search cities">
+        <ul id="city-results" role="listbox" aria-label="City results"></ul>
+      </div>
       <label>Compare</label>
       <button id="swipe-toggle" type="button" class="active">⇔ Swipe On</button>
     </div>
@@ -52,6 +54,22 @@
     <button id="basemap-toggle-btn" type="button" class="fab" title="Toggle Basemap">🗺️</button>
     <!-- Floating action button for geolocation -->
     <button id="geolocate-btn" type="button" class="fab" title="My Location">📍</button>
+    <!-- Floating action button for info -->
+    <button id="info-btn" type="button" class="fab" title="About & Disclaimer">ℹ️</button>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="info-modal" class="modal">
+    <div class="modal-content">
+      <button id="modal-close" type="button" class="modal-close" aria-label="Close">✕</button>
+      <h2>About</h2>
+      <p>Master Plan Viewer is a lightweight web application that displays georeferenced raster master plans of Indian cities on an interactive map. It uses Cloud Optimized GeoTIFFs (COGs) for efficient streaming and OpenLayers for mapping.</p>
+      
+      <h3>Disclaimer</h3>
+      <p><strong>Data Sources:</strong> All master plans and data displayed in this viewer are collected from various government agencies, municipal corporations, development authorities, and other sources found on the internet.</p>
+      <p><strong>Liability:</strong> The author takes no liability regarding the correctness, completeness, accuracy, updatedness, or reliability of the data presented. Users should verify all information with official sources before making any decisions based on this viewer's content.</p>
+      <p><strong>Use at Your Own Risk:</strong> This tool is provided as-is for informational purposes only. Always consult official government sources for authoritative planning information.</p>
+    </div>
   </div>
 
   <!-- Vertical swipe divider -->
