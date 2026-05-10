@@ -487,7 +487,17 @@
   function setupThemeToggle() {
     var toggleBtn = document.getElementById('theme-toggle');
 
+<<<<<<< HEAD
     currentTheme = 'light';
+=======
+    try {
+      savedTheme = localStorage.getItem('theme');
+    } catch (err) {
+      savedTheme = null;
+    }
+
+    currentTheme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
+>>>>>>> 47a506256242d65d12825512edbb6158a9ce0c5c
 
     function applyBasemapFilter(theme) {
       if (!map) return;
