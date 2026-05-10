@@ -90,6 +90,7 @@
   // ── 1. City Selector ─────────────────────────────────
   function setupCitySelector(cities) {
     var input = document.getElementById('city-search');
+    var clearBtn = document.getElementById('city-search-clear');
     var resultsList = document.getElementById('city-results');
     var debounceTimer = null;
     var activeIndex = -1;
@@ -99,6 +100,18 @@
       resultsList.classList.remove('open');
       resultsList.innerHTML = '';
       activeIndex = -1;
+    }
+
+    function updateClearButton() {
+      clearBtn.classList.toggle('visible', !!input.value);
+    }
+
+    function clearSearch() {
+      clearTimeout(debounceTimer);
+      input.value = '';
+      updateClearButton();
+      closeResults();
+      input.focus();
     }
 
     function renderResults(items) {
@@ -148,6 +161,7 @@
 
     function selectCity(city) {
       input.value = city.name;
+      updateClearButton();
       closeResults();
       loadCity(city);
     }
@@ -159,9 +173,18 @@
     });
 
     input.addEventListener('input', function () {
+      updateClearButton();
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () { search(input.value); }, 150);
     });
+
+    clearBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      clearSearch();
+    });
+
+    updateClearButton();
 
     input.addEventListener('keydown', function (e) {
       var items = resultsList.querySelectorAll('li:not(.no-results)');
@@ -238,6 +261,7 @@
   // ── 2. Address Search (Nominatim) ───────────────────
   function setupAddressSearch() {
     var input = document.getElementById('address-search');
+    var clearBtn = document.getElementById('address-search-clear');
     var resultsList = document.getElementById('search-results');
     var debounceTimer = null;
     var activeIndex = -1;
@@ -246,6 +270,18 @@
       resultsList.classList.remove('open');
       resultsList.innerHTML = '';
       activeIndex = -1;
+    }
+
+    function updateClearButton() {
+      clearBtn.classList.toggle('visible', !!input.value);
+    }
+
+    function clearSearch() {
+      clearTimeout(debounceTimer);
+      input.value = '';
+      updateClearButton();
+      closeResults();
+      input.focus();
     }
 
     function renderResults(items) {
@@ -273,6 +309,7 @@
 
     function selectResult(item) {
       input.value = item.display_name;
+      updateClearButton();
       closeResults();
       var bbox = item.boundingbox; // [minLat, maxLat, minLon, maxLon]
       var extent = ol.proj.transformExtent(
@@ -297,9 +334,18 @@
     }
 
     input.addEventListener('input', function () {
+      updateClearButton();
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(function () { search(input.value); }, 350);
     });
+
+    clearBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      clearSearch();
+    });
+
+    updateClearButton();
 
     // Keyboard navigation
     input.addEventListener('keydown', function (e) {
@@ -440,15 +486,8 @@
   // ── 5. Theme Toggle ─────────────────────────────────
   function setupThemeToggle() {
     var toggleBtn = document.getElementById('theme-toggle');
-    var savedTheme = null;
 
-    try {
-      savedTheme = localStorage.getItem('theme');
-    } catch (err) {
-      savedTheme = null;
-    }
-
-    currentTheme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    currentTheme = 'light';
 
     function applyBasemapFilter(theme) {
       if (!map) return;
@@ -471,11 +510,6 @@
       toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
       toggleBtn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
       applyBasemapFilter(theme);
-      try {
-        localStorage.setItem('theme', theme);
-      } catch (err) {
-        // Ignore storage failures.
-      }
     }
 
     // Defer theme application until after map is initialized

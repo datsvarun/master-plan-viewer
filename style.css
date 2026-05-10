@@ -169,7 +169,7 @@ h2 {
 }
 
 #address-search {
-  padding: 5px 8px;
+  padding: 5px 28px 5px 8px;
   cursor: text;
 }
 
@@ -178,10 +178,39 @@ h2 {
 }
 
 #city-search {
-  padding: 5px 8px;
+  padding: 5px 28px 5px 8px;
   box-sizing: border-box;
   outline: none;
   cursor: text;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted-color);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-btn:hover,
+.clear-btn:focus-visible {
+  color: var(--text-color);
+  background: var(--surface-hover);
+}
+
+.clear-btn.visible {
+  display: inline-flex;
 }
 
 #address-search:focus,
