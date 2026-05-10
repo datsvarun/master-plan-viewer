@@ -163,6 +163,33 @@
       "zoom": 11
     },
     {
+      "name": "Hyderabad Outer Region (HMDA)",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/HMDA_Outer_comp.tif",
+      "center": [
+        78.4867,
+        17.385
+      ],
+      "zoom": 10
+    },
+    {
+      "name": "Hyderabad Airport Area",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Hyderabad-Airport-Area.tif",
+      "center": [
+        78.4299,
+        17.2403
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Hyderabad-Cyberabad Development Area",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Hyderabad-Cyberabad-Development-Area.tif",
+      "center": [
+        78.3808,
+        17.4435
+      ],
+      "zoom": 12
+    },
+    {
       "name": "Mumbai City",
       "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Mumbai_Final_COG.tif",
       "center": [
