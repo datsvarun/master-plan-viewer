@@ -32,7 +32,7 @@
     </div>
 
     <div id="menu-content">
-      <h2>Varun's Indian Master Plan Viewer</h2>
+      <h2>Varun's City Master Plan Tool</h2>
       <label for="address-search">Search Address</label>
       <div id="search-wrapper">
         <input id="address-search" type="search" placeholder="Search for a place…" autocomplete="off" aria-label="Search address">
@@ -47,18 +47,36 @@
       </div>
       <label>Compare</label>
       <button id="swipe-toggle" type="button" class="active">⇔ Swipe On</button>
+      <label>Comments</label>
+      <button id="comments-toggle" type="button" class="no-city">💬 Show and Add Comments</button>
     </div>
   </div>
 
   <!-- Bottom Left Controls -->
   <div id="bottom-left-controls">
-    <!-- Floating action button for basemap toggle -->
-    <button id="basemap-toggle-btn" type="button" class="fab" title="Toggle Basemap">🗺️</button>
-    <!-- Floating action button for geolocation -->
-    <button id="geolocate-btn" type="button" class="fab" title="My Location">📍</button>
-    <!-- Floating action button for info -->
-    <button id="info-btn" type="button" class="fab" title="About & Disclaimer">ℹ️</button>
+    <div class="fab-row">
+      <button id="add-comment-fab" type="button" class="fab" title="Add Comment">💭</button>
+      <span class="fab-label">Add Comment</span>
+    </div>
+    <div class="fab-row">
+      <button id="basemap-toggle-btn" type="button" class="fab" title="Toggle Basemap">🗺️</button>
+      <span class="fab-label">Satellite</span>
+    </div>
+    <div class="fab-row">
+      <button id="geolocate-btn" type="button" class="fab" title="My Location">📍</button>
+      <span class="fab-label">Locate Me</span>
+    </div>
+    <div class="fab-row">
+      <button id="info-btn" type="button" class="fab" title="About & Disclaimer">ℹ️</button>
+      <span class="fab-label">Info</span>
+    </div>
   </div>
+
+  <!-- Add-comment mode hint toast -->
+  <div id="add-comment-hint">Tap on map to place your comment</div>
+
+  <!-- "Select a city first" toast -->
+  <div id="city-required-toast">Select a city to comment</div>
 
   <!-- Info Modal -->
   <div id="info-modal" class="modal">
@@ -74,6 +92,37 @@
     </div>
   </div>
 
+  <!-- Comment context menu (right-click / long-press) -->
+  <div id="comment-context-menu">
+    <button id="context-menu-add" type="button">+ Add Comment</button>
+  </div>
+
+  <!-- Add comment form modal -->
+  <div id="comment-form-modal" class="modal">
+    <div class="modal-content" id="comment-form-content">
+      <button id="comment-form-close" type="button" class="modal-close" aria-label="Close">✕</button>
+      <h2>Add Comment</h2>
+      <form id="comment-form">
+        <label for="comment-name">Your Name (optional)</label>
+        <input id="comment-name" type="text" placeholder="Anonymous" maxlength="50" autocomplete="off">
+        <label for="comment-text">Comment *</label>
+        <textarea id="comment-text" placeholder="Share your thoughts…" maxlength="150" rows="4"></textarea>
+        <p id="comment-char-count">150 characters remaining</p>
+        <div class="modal-form-actions">
+          <button type="submit" id="comment-submit">Submit</button>
+          <button type="button" id="comment-cancel">Cancel</button>
+        </div>
+        <p id="comment-status"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Comment read popover -->
+  <div id="suggestion-popover">
+    <button id="popover-close" type="button" aria-label="Close">✕</button>
+    <div id="popover-content"></div>
+  </div>
+
   <!-- Vertical swipe divider -->
   <div id="swipe-handle"></div>
 
@@ -83,6 +132,8 @@
   <script src="https://cdn.jsdelivr.net/npm/ol@10.9.0/dist/ol.js"></script>
   <!-- India Boundary Corrector -->
   <script src="https://cdn.jsdelivr.net/npm/@india-boundary-corrector/openlayers-layer/dist/index.global.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <!-- App JS -->
   <script src="main.js"></script>
 

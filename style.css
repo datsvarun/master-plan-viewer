@@ -63,7 +63,7 @@ h2 {
   border: 1px solid var(--panel-border);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   font-size: 13px;
   min-width: 180px;
   backdrop-filter: blur(16px);
@@ -130,10 +130,18 @@ h2 {
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
+  overflow: visible;
+  max-height: 700px;
+  opacity: 1;
+  transition: max-height 0.3s ease, opacity 0.2s ease, margin-top 0.25s ease;
 }
 
 #menu-content.hidden {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 #controls select,
@@ -397,6 +405,41 @@ h2 {
   align-items: flex-start;
 }
 
+.fab-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── FAB intro labels ─────────────────────────────────── */
+@keyframes fab-label-intro {
+  0%   { opacity: 0; transform: translateX(-10px); }
+  14%  { opacity: 1; transform: translateX(0); }
+  78%  { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-10px); }
+}
+
+.fab-label {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  animation: fab-label-intro 5s ease forwards;
+}
+
+.fab-row:nth-child(1) .fab-label { animation-delay: 0.0s; }
+.fab-row:nth-child(2) .fab-label { animation-delay: 0.15s; }
+.fab-row:nth-child(3) .fab-label { animation-delay: 0.3s; }
+.fab-row:nth-child(4) .fab-label { animation-delay: 0.45s; }
+
 /* ── Floating Action Button (Geolocation) ────────────── */
 .fab {
   width: 44px;
@@ -488,4 +531,312 @@ h2 {
   line-height: 1.6;
   color: var(--muted-color);
   font-size: 13px;
+}
+
+/* ── FAB / button active state ───────────────────────── */
+.fab.active,
+#comments-toggle.active {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+#comments-toggle.no-city {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Prevent iOS native long-press callout on the map ── */
+#map {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* ── Comment context menu ────────────────────────────── */
+#comment-context-menu {
+  position: fixed;
+  z-index: 50;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  display: none;
+  overflow: hidden;
+}
+
+#comment-context-menu.open {
+  display: block;
+}
+
+#context-menu-add {
+  display: block;
+  width: 100%;
+  padding: 10px 18px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-color);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#context-menu-add:hover {
+  background: var(--surface-hover);
+}
+
+/* ── Comment form modal ──────────────────────────────── */
+#comment-form-content {
+  max-width: 360px;
+  width: 90vw;
+}
+
+#comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#comment-form label {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted-color);
+}
+
+#comment-form input[type="text"],
+#comment-form textarea {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+#comment-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+#comment-form input:focus,
+#comment-form textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+#comment-char-count {
+  font-size: 11px;
+  color: var(--muted-color);
+  margin: -4px 0 0;
+  text-align: right;
+}
+
+#comment-char-count.over {
+  color: #e53935;
+}
+
+.modal-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+#comment-submit {
+  flex: 1;
+  padding: 8px;
+  background: var(--primary);
+  color: var(--primary-text);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#comment-submit:hover { opacity: 0.9; }
+#comment-submit:disabled { opacity: 0.55; cursor: default; }
+
+#comment-cancel {
+  flex: 1;
+  padding: 8px;
+  background: var(--surface);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#comment-cancel:hover { border-color: var(--primary); }
+
+#comment-status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted-color);
+  min-height: 16px;
+}
+
+/* ── Comment read popover ────────────────────────────── */
+#suggestion-popover {
+  position: absolute;
+  z-index: 30;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  padding: 12px 14px;
+  width: 260px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+  color: var(--text-color);
+  font-size: 13px;
+}
+
+#suggestion-popover.open {
+  display: block;
+}
+
+#popover-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--surface-hover);
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+#popover-close:hover { background: var(--panel-border); }
+
+.popover-header {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-color);
+  padding-right: 28px;
+  margin-bottom: 6px;
+}
+
+.popover-item {
+  padding: 7px 0;
+  border-top: 1px solid var(--panel-border);
+}
+
+.popover-item:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.popover-meta {
+  font-size: 11px;
+  color: var(--muted-color);
+  margin-bottom: 4px;
+}
+
+.popover-text {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text-color);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+/* ── Mobile: centre popover instead of pixel-positioning ── */
+@media (max-width: 640px) {
+  #suggestion-popover {
+    position: fixed !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: auto !important;
+    bottom: 88px;
+    width: auto;
+    max-width: none;
+    transform: none;
+  }
+}
+
+/* ── Add-comment FAB ─────────────────────────────────── */
+#add-comment-fab:hover {
+  transform: scale(1.06);
+}
+
+#add-comment-fab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ── "Tap on map" hint toast ─────────────────────────── */
+#add-comment-hint {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+#add-comment-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── "Select a city" toast ───────────────────────────── */
+#city-required-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  background: rgba(24, 32, 42, 0.88);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 20px;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+#city-required-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── City search pulse highlight ─────────────────────── */
+@keyframes city-search-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0, 120, 215, 0.5); border-color: var(--primary); }
+  50%  { box-shadow: 0 0 0 6px rgba(0, 120, 215, 0); border-color: var(--primary); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 120, 215, 0); border-color: var(--input-border); }
+}
+
+#city-search.pulse-highlight {
+  animation: city-search-pulse 0.6s ease-out 3;
+  border-color: var(--primary);
+  outline: none;
 }

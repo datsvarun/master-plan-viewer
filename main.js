@@ -14,6 +14,32 @@
   var swipeX; // swipe position in CSS pixels from left edge (landscape)
   var swipeY; // swipe position in CSS pixels from top edge (portrait)
   var currentTheme = 'light';
+  var currentCity = null;
+  var suggestionsLayer;
+  var loadSuggestionsForCity;
+  var cancelActiveFeedback;
+
+  // ── Menu open / close helpers ────────────────────────
+  var _menuOpenTimer = null;
+
+  function openMenu() {
+    var mc = document.getElementById('menu-content');
+    if (!mc) return;
+    clearTimeout(_menuOpenTimer);
+    mc.style.overflow = 'hidden'; // clip content while expanding
+    mc.classList.remove('hidden');
+    _menuOpenTimer = setTimeout(function () {
+      if (!mc.classList.contains('hidden')) { mc.style.overflow = ''; } // let dropdowns overflow
+    }, 320);
+  }
+
+  function closeMenu() {
+    var mc = document.getElementById('menu-content');
+    if (!mc || mc.classList.contains('hidden')) return;
+    clearTimeout(_menuOpenTimer);
+    mc.style.overflow = 'hidden'; // clip content while collapsing
+    mc.classList.add('hidden');
+  }
 
   // ── Bootstrap ────────────────────────────────────────
   fetch('cities.json')
@@ -85,6 +111,13 @@
     setupBasemapToggle();
     setupSwipe();
     setupMenuToggle();
+    setupFeedback();
+
+    // Close menu only on real user interaction with the map
+    function closeMenuOnInput() { closeMenu(); }
+    var mapViewport = map.getViewport();
+    mapViewport.addEventListener('pointerdown', closeMenuOnInput);
+    mapViewport.addEventListener('wheel', closeMenuOnInput, { passive: true });
   }
 
   // ── 1. City Selector ─────────────────────────────────
@@ -163,6 +196,7 @@
       input.value = city.name;
       updateClearButton();
       closeResults();
+      input.blur();
       loadCity(city);
     }
 
@@ -218,6 +252,10 @@
     });
 
     function loadCity(city) {
+      currentCity = city.name;
+      if (cancelActiveFeedback) { cancelActiveFeedback(); }
+      var ct = document.getElementById('comments-toggle');
+      if (ct) { ct.classList.remove('no-city'); }
       // Build the source.
       // WebGLTile works with both GeoTIFF and XYZ sources.
       var source;
@@ -251,6 +289,8 @@
         maxZoom: 20,
         projection: 'EPSG:3857'
       }));
+
+      if (loadSuggestionsForCity) { loadSuggestionsForCity(city.name); }
     }
 
     // Keep the first city ready without auto-loading it.
@@ -311,6 +351,7 @@
       input.value = item.display_name;
       updateClearButton();
       closeResults();
+      input.blur();
       var bbox = item.boundingbox; // [minLat, maxLat, minLon, maxLon]
       var extent = ol.proj.transformExtent(
         [parseFloat(bbox[2]), parseFloat(bbox[0]), parseFloat(bbox[3]), parseFloat(bbox[1])],
@@ -528,7 +569,7 @@
     var menuContent = document.getElementById('menu-content');
 
     toggleBtn.addEventListener('click', function () {
-      menuContent.classList.toggle('hidden');
+      if (menuContent.classList.contains('hidden')) { openMenu(); } else { closeMenu(); }
     });
   }
 
@@ -674,6 +715,345 @@
     map.render();
   }
 
+  // ── 8. Comments ───────────────────────────────────────
+  function setupFeedback() {
+    var SUPABASE_URL = 'https://rglaghcgwaxtugnphzil.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnbGFnaGNnd2F4dHVnbnBoemlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDU1NzIsImV4cCI6MjA4NjQyMTU3Mn0.wjNeC-K0nxCIoYXC93nH_uAbyInxMExmTL0WSCAWswk';
+    var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    var commentsVisible = false;
+    var addCommentMode = false;
+    var pendingCoord = null;
+    var longPressTimer = null;
+    var suppressNextClick = false;
+
+    var toggleBtn      = document.getElementById('comments-toggle');
+    var addCommentFab  = document.getElementById('add-comment-fab');
+    var addCommentHint = document.getElementById('add-comment-hint');
+    var contextMenu    = document.getElementById('comment-context-menu');
+    var formModal    = document.getElementById('comment-form-modal');
+    var formClose    = document.getElementById('comment-form-close');
+    var nameInput    = document.getElementById('comment-name');
+    var textArea     = document.getElementById('comment-text');
+    var charCount    = document.getElementById('comment-char-count');
+    var submitBtn    = document.getElementById('comment-submit');
+    var cancelBtn    = document.getElementById('comment-cancel');
+    var formStatus   = document.getElementById('comment-status');
+    var popover      = document.getElementById('suggestion-popover');
+    var popoverClose = document.getElementById('popover-close');
+    var popoverContent = document.getElementById('popover-content');
+    var mapViewport  = map.getViewport();
+
+    // ── Cluster layer ──
+    var rawSource = new ol.source.Vector();
+    var clusterSource = new ol.source.Cluster({ distance: 40, source: rawSource });
+
+    suggestionsLayer = new ol.layer.Vector({
+      source: clusterSource,
+      visible: false,
+      zIndex: 999,
+      style: function (feature) {
+        var features = feature.get('features') || [];
+        var size = features.length;
+        if (!size) { return null; }
+        if (size > 1) {
+          return new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 14,
+              fill: new ol.style.Fill({ color: 'rgba(0, 120, 215, 0.85)' }),
+              stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+            }),
+            text: new ol.style.Text({
+              text: String(size),
+              fill: new ol.style.Fill({ color: '#fff' }),
+              font: 'bold 11px system-ui, sans-serif'
+            })
+          });
+        }
+        var data = features[0].get('suggestionData');
+        var fill = (data && data.type === 'objection') ? '#e53935' : '#43a047';
+        return new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 6,
+            fill: new ol.style.Fill({ color: fill }),
+            stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
+          })
+        });
+      }
+    });
+    map.addLayer(suggestionsLayer);
+
+    // ── Load suggestions for city ──
+    loadSuggestionsForCity = function (cityName) {
+      sb.from('suggestions').select('*').eq('city', cityName)
+        .then(function (result) {
+          if (result.error) { console.error('Supabase:', result.error); return; }
+          rawSource.clear();
+          (result.data || []).forEach(function (row) {
+            var feat = new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.fromLonLat([row.lng, row.lat]))
+            });
+            feat.set('suggestionData', row);
+            rawSource.addFeature(feat);
+          });
+        });
+    };
+
+    // ── Close all UI on city switch ──
+    cancelActiveFeedback = function () {
+      exitAddCommentMode();
+      closeContextMenu();
+      closeCommentForm();
+      closePopover();
+    };
+
+    // ── Toggle button ──
+    toggleBtn.addEventListener('click', function () {
+      if (!currentCity) {
+        openMenu();
+        var cs = document.getElementById('city-search');
+        cs.classList.remove('pulse-highlight');
+        void cs.offsetWidth;
+        cs.classList.add('pulse-highlight');
+        var toast = document.getElementById('city-required-toast');
+        toast.classList.add('visible');
+        clearTimeout(window._cityToastTimer);
+        window._cityToastTimer = setTimeout(function () {
+          cs.classList.remove('pulse-highlight');
+          toast.classList.remove('visible');
+        }, 2000);
+        return;
+      }
+      commentsVisible = !commentsVisible;
+      suggestionsLayer.setVisible(commentsVisible);
+      toggleBtn.classList.toggle('active', commentsVisible);
+      toggleBtn.textContent = commentsVisible ? '💬 Hide Comments' : '💬 Show and Leave Comments';
+      if (!commentsVisible) { closePopover(); exitAddCommentMode(); }
+    });
+
+    // ── Add-comment FAB (bottom-right) ──
+    function exitAddCommentMode() {
+      addCommentMode = false;
+      addCommentFab.classList.remove('active');
+      addCommentHint.classList.remove('visible');
+      document.getElementById('map').style.cursor = '';
+    }
+
+    addCommentFab.addEventListener('click', function () {
+      if (addCommentMode) { exitAddCommentMode(); return; }
+      if (!currentCity) {
+        // Open menu if collapsed so the city search is visible
+        openMenu();
+        // Pulse the city search input
+        var cs = document.getElementById('city-search');
+        cs.classList.remove('pulse-highlight');
+        void cs.offsetWidth; // restart animation if already running
+        cs.classList.add('pulse-highlight');
+        // Show 2-second toast
+        var toast = document.getElementById('city-required-toast');
+        toast.classList.add('visible');
+        clearTimeout(window._cityToastTimer);
+        window._cityToastTimer = setTimeout(function () {
+          cs.classList.remove('pulse-highlight');
+          toast.classList.remove('visible');
+        }, 2000);
+        return;
+      }
+      if (!commentsVisible) {
+        commentsVisible = true;
+        suggestionsLayer.setVisible(true);
+        toggleBtn.classList.add('active');
+        toggleBtn.textContent = '💬 Hide Comments';
+      }
+      addCommentMode = true;
+      addCommentFab.classList.add('active');
+      addCommentHint.classList.add('visible');
+      document.getElementById('map').style.cursor = 'crosshair';
+      closeContextMenu();
+      closePopover();
+    });
+
+    // ── Auto-open popup at zoom >= 17 on moveend ──
+    map.on('moveend', function () {
+      if (!commentsVisible) { return; }
+      if (map.getView().getZoom() < 17) { closePopover(); return; }
+      var sz = map.getSize();
+      var cp = [Math.round(sz[0] / 2), Math.round(sz[1] / 2)];
+      var found = null;
+      map.forEachFeatureAtPixel(cp, function (f) { found = f; return true; },
+        { layerFilter: function (l) { return l === suggestionsLayer; }, hitTolerance: 50 });
+      if (found) { openPopover(found, cp); }
+    });
+
+    // ── Click: place comment pin or read popup ──
+    map.on('singleclick', function (e) {
+      if (suppressNextClick) { suppressNextClick = false; return; }
+      if (addCommentMode) {
+        exitAddCommentMode();
+        pendingCoord = ol.proj.toLonLat(e.coordinate);
+        openCommentForm();
+        return;
+      }
+      if (!commentsVisible) { return; }
+      var hit = false;
+      map.forEachFeatureAtPixel(e.pixel, function (feature) {
+        openPopover(feature, e.pixel); hit = true; return true;
+      }, { layerFilter: function (l) { return l === suggestionsLayer; } });
+      if (!hit) { closePopover(); }
+    });
+
+    // ── Right-click (desktop) → context menu ──
+    mapViewport.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      suppressNextClick = true;
+      clearTimeout(longPressTimer);
+      if (!currentCity) { return; }
+      var pixel = map.getEventPixel(e);
+      var onFeature = false;
+      map.forEachFeatureAtPixel(pixel, function () { onFeature = true; return true; },
+        { layerFilter: function (l) { return l === suggestionsLayer; } });
+      if (onFeature) { suppressNextClick = false; return; }
+      pendingCoord = ol.proj.toLonLat(map.getCoordinateFromPixel(pixel));
+      showContextMenu(e.clientX, e.clientY);
+    });
+
+    // ── Long press (mobile, covers iOS where contextmenu doesn't fire) ──
+    mapViewport.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1 || !currentCity) { return; }
+      var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(function () {
+        suppressNextClick = true;
+        var pixel = map.getEventPixel({ clientX: tx, clientY: ty });
+        var onFeature = false;
+        map.forEachFeatureAtPixel(pixel, function () { onFeature = true; return true; },
+          { layerFilter: function (l) { return l === suggestionsLayer; } });
+        if (onFeature) { suppressNextClick = false; return; }
+        pendingCoord = ol.proj.toLonLat(map.getCoordinateFromPixel(pixel));
+        showContextMenu(tx, ty);
+      }, 600);
+    }, { passive: true });
+
+    mapViewport.addEventListener('touchmove', function () { clearTimeout(longPressTimer); }, { passive: true });
+    mapViewport.addEventListener('touchend',  function () { clearTimeout(longPressTimer); }, { passive: true });
+
+    // ── Context menu ──
+    document.getElementById('context-menu-add').addEventListener('click', function () {
+      closeContextMenu();
+      openCommentForm();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (contextMenu.classList.contains('open') && !contextMenu.contains(e.target)) {
+        closeContextMenu();
+      }
+    });
+
+    function showContextMenu(x, y) {
+      contextMenu.style.left = x + 'px';
+      contextMenu.style.top  = y + 'px';
+      contextMenu.classList.add('open');
+    }
+    function closeContextMenu() { contextMenu.classList.remove('open'); }
+
+    // ── Comment form ──
+    textArea.addEventListener('input', function () {
+      var rem = 150 - textArea.value.length;
+      charCount.textContent = rem + ' character' + (Math.abs(rem) === 1 ? '' : 's') + ' remaining';
+      charCount.classList.toggle('over', rem < 0);
+    });
+
+    function openCommentForm() {
+      nameInput.value = '';
+      textArea.value = '';
+      charCount.textContent = '150 characters remaining';
+      charCount.classList.remove('over');
+      formStatus.textContent = '';
+      submitBtn.disabled = false;
+      formModal.classList.add('open');
+      setTimeout(function () { textArea.focus(); }, 50);
+    }
+
+    function closeCommentForm() {
+      formModal.classList.remove('open');
+      pendingCoord = null;
+    }
+
+    formClose.addEventListener('click', closeCommentForm);
+    cancelBtn.addEventListener('click', closeCommentForm);
+    formModal.addEventListener('click', function (e) {
+      if (e.target === formModal) { closeCommentForm(); }
+    });
+
+    document.getElementById('comment-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!pendingCoord || !currentCity) { return; }
+      var text = textArea.value.trim();
+      if (!text) { formStatus.textContent = 'Please enter a comment.'; return; }
+      if (text.length > 150) { formStatus.textContent = 'Comment exceeds 150 characters.'; return; }
+
+      submitBtn.disabled = true;
+      formStatus.textContent = 'Submitting…';
+
+      sb.from('suggestions').insert({
+        city: currentCity,
+        lng: pendingCoord[0],
+        lat: pendingCoord[1],
+        type: 'suggestion',
+        category: 'other',
+        text: text,
+        author_name: nameInput.value.trim() || null
+      }).then(function (result) {
+        submitBtn.disabled = false;
+        if (result.error) { formStatus.textContent = 'Error: ' + result.error.message; return; }
+        closeCommentForm();
+        loadSuggestionsForCity(currentCity);
+      });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') { return; }
+      exitAddCommentMode();
+      closeContextMenu();
+      closeCommentForm();
+      closePopover();
+    });
+
+    // ── Read popover ──
+    function openPopover(feature, pixel) {
+      var features = feature.get('features') || [];
+      if (!features.length) { return; }
+      var header = features.length + ' Comment' + (features.length === 1 ? '' : 's');
+      var items = features.map(function (f) {
+        var d = f.get('suggestionData');
+        if (!d) { return ''; }
+        var date = d.created_at
+          ? new Date(d.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '';
+        return '<div class="popover-item">' +
+          '<div class="popover-meta">' + escapeHtml(d.author_name || 'Anonymous') + (date ? ' · ' + date : '') + '</div>' +
+          '<p class="popover-text">' + escapeHtml(d.text) + '</p>' +
+          '</div>';
+      }).join('');
+      popoverContent.innerHTML = '<div class="popover-header">' + escapeHtml(header) + '</div>' + items;
+
+      var mapEl = document.getElementById('map');
+      var pw = 260, left = pixel[0] + 14, top = pixel[1] - 24;
+      if (left + pw > mapEl.clientWidth - 8) { left = pixel[0] - pw - 14; }
+      if (top < 8) { top = 8; }
+      if (top + 240 > mapEl.clientHeight) { top = mapEl.clientHeight - 248; }
+      popover.style.left = left + 'px';
+      popover.style.top  = top  + 'px';
+      popover.classList.add('open');
+    }
+
+    function closePopover() { popover.classList.remove('open'); }
+    popoverClose.addEventListener('click', closePopover);
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  }
 
 })();
