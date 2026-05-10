@@ -101,7 +101,7 @@
     },
     {
       "name": "Mumbai Region Airport Funnel",
-      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/Tiles/Airport_Funnel_MUMBAI_NAVI_MUMBAI_COG_Final.tif",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Airport_Funnel_MUMBAI_NAVI_MUMBAI_COG_Final.tif",
       "center": [
         73.0169,
         19.033
@@ -277,6 +277,42 @@
       "center": [
         74.7973,
         34.0837
+      ],
+      "zoom": 13
+    },
+    {
+      "name": "Amaravati",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Amaravati_COG_Final.tif",
+      "center": [
+        80.3319,
+        16.5165
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Bhiwandi Area",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Bhiwandi-Area_MMRDA_COG.tif",
+      "center": [
+        73.0481,
+        19.2987
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Chandigarh",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Chandigarh-COG-Final.tif",
+      "center": [
+        76.7794,
+        30.7333
+      ],
+      "zoom": 12
+    },
+    {
+      "name": "Kolkata New Town",
+      "cogUrl": "https://pub-5d7a831c335c4d83b8b0f8ebe750e175.r2.dev/City-Tiles/Kolkata_New_Town_COG_Final.tif",
+      "center": [
+        88.4777,
+        22.5876
       ],
       "zoom": 13
     }
